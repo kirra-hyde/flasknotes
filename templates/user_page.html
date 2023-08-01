@@ -19,19 +19,21 @@
     {% endfor %}
   </ul>
 
-  <form method="POST", action="/users/{{user.username}}/notes/add">
-    <button>Add another note</button>
-  </form>
+  <a href="/users/{{user.username}}/notes/add">Add another note</a>
 
   <form method="POST", action="/users/{{user.username}}/delete">
+
+    {{ form.hidden_tag() }}
+
     <button>Delete account and all posts!</button>
+
   </form>
 
   <form method="POST" action="/logout">
 
     {{ form.hidden_tag() }}
 
-    <button type="submit">Log Out</button>
+    <button>Log Out</button>
 
   </form>
 

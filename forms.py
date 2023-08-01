@@ -47,5 +47,5 @@ class LoginForm(FlaskForm):
     )
 
 
-class LogoutForm(FlaskForm):
+class CSRFProtectionForm(FlaskForm):
     """Form for CSRF Protection on logout"""

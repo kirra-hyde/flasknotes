@@ -52,16 +52,17 @@ class User(db.Model):
         """
 
         hashed = bcrypt.generate_password_hash(password).decode('utf8')
-
-        #TODO: db add and commit is good here.
-
-        return cls(
+        user = cls(
             username=username,
             password=hashed,
             email=email,
             first_name=first_name,
             last_name=last_name
             )
+        db.session.add(user)
+        db.session.commit()
+
+        return user
 
     @classmethod
     def authenticate(cls, username, password):
@@ -78,25 +79,25 @@ class User(db.Model):
         return False
 
 
-Class Note(db.Model):
+class Note(db.Model):
     """User Notes"""
     __tablename__="notes"
 
-    id = Column.db(
+    id = db.Column(
         db.Integer,
         primary_key=True,
         autoincrement=True
     )
-    title = Column.db(
+    title = db.Column(
         db.String(100),
         nullable=False,
     )
-    content = Column.db(
+    content = db.Column(
         db.Text,
         nullable=False
     )
-    owner_username = Column.db(
+    owner_username = db.Column(
         db.String(20),
-        db.ForeignKey("users.username")
+        db.ForeignKey("users.username"),
         nullable=False
     )

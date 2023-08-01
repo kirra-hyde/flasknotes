@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User
-from forms import RegisterForm, LoginForm, LogoutForm
+from forms import RegisterForm, LoginForm, CSRFProtectionForm
 from werkzeug.exceptions import Unauthorized
 
 app = Flask(__name__)
@@ -20,8 +20,10 @@ toolbar = DebugToolbarExtension(app)
 
 @app.get("/")
 def route_redirect():
-    """Redirects users from route to register"""
-       #TODO: Good to redirect to user page if logged in
+    """Redirects logged-in users to their page and all others to register"""
+    if session.get("username"):
+        return redirect(f"/users/{session['username']}")
+
     return redirect("/register")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -37,6 +39,11 @@ def display_registration_form_and_handle_registration():
         email = form.email.data
         first_name = form.first_name.data
         last_name = form.last_name.data
+
+        # Check if users already exists and return flash error
+        if User.query.get(username) is not None:
+            flash("Username already exists.")
+            return render_template("register_form.html", form=form)
 
         user = User.register(username, password, email, first_name, last_name)
 
@@ -77,7 +84,7 @@ def display_user_page(username):
     if session.get("username") != username:
         raise Unauthorized()
 
-    form = LogoutForm()
+    form = CSRFProtectionForm()
 
     user = User.query.get_or_404(username)
 
@@ -87,7 +94,7 @@ def display_user_page(username):
 def logout():
     """ Logs the current user out and redirect them to root """
 
-    form = LogoutForm()
+    form = CSRFProtectionForm()
 
     if form.validate_on_submit():
         session.pop("username", None) #:TODO: Scary message
@@ -98,7 +105,21 @@ def logout():
 def delete_account(username):
     """Removes current user from database.  Redirect to homepage."""
 
+    if session.get("username") != username:
+        raise Unauthorized()
+
     user = User.query.get_or_404(username)
 
+    # Delete all the user's notes
+    for note in user.notes:
+        db.session.delete(note)
+
+    db.session.commit()
+
+    # Delete the user
     db.session.delete(user)
     db.session.commit()
+
+    session.pop("username", None)
+
+    return redirect("/")
