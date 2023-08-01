@@ -5,15 +5,16 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User
 from forms import RegisterForm, LoginForm, LogoutForm
+from werkzeug.exceptions import Unauthorized
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
     "DATABASE_URL", "postgresql:///user_notes")
 app.config["SQLALCHEMY_ECHO"] = True
-app.config["SECRET_KEY"] = "abc123"
+app.config["SECRET_KEY"] = "abc123"  #TODO: Put in env
 
 connect_db(app)
-db.create_all()
+db.create_all()  #TODO: Unnecessary to do each time.
 
 toolbar = DebugToolbarExtension(app)
 
@@ -28,6 +29,7 @@ def display_registration_form_and_handle_registration():
     Handles form submission and creates user. Redirects to user page."""
 
     form = RegisterForm()
+    #TODO: Good to redirect to user page if logged in
 
     if form.validate_on_submit():
         username = form.username.data
@@ -40,6 +42,8 @@ def display_registration_form_and_handle_registration():
 
         db.session.add(user)
         db.session.commit()
+
+        session["username"] = user.username  #TODO: Could be in global variable..l
 
         return redirect(f"/users/{username}")
 
@@ -58,7 +62,7 @@ def display_login_form_and_handle_login():
         user = User.authenticate(username, password)
 
         if user:
-            session[username] = user.username
+            session["username"] = user.username
             return redirect(f"users/{username}")
         else:
             form.username.errors = ["bad name/password"]
@@ -67,12 +71,17 @@ def display_login_form_and_handle_login():
 
 @app.get("/users/<username>")
 def display_user_page(username):
-    """Show user page of a logged in user."""
-    #TODO: Add way to confirm login
+    """Show user page of a logged in user.  If not the authenticated user,
+    return unauthorized"""
+
+    if session.get("username") != username:
+        raise Unauthorized()
 
     form = LogoutForm()
 
-    return render_template("user_page.html", form=form)
+    user = User.query.get_or_404(username)
+
+    return render_template("user_page.html", form=form, user=user)
 
 @app.post("/logout")
 def logout():
@@ -81,6 +90,6 @@ def logout():
     form = LogoutForm()
 
     if form.validate_on_submit():
-        session.pop("username", None)
+        session.pop("username", None) #:TODO: Scary message
 
     return redirect("/")

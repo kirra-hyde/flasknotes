@@ -46,5 +46,6 @@ class LoginForm(FlaskForm):
         validators=[InputRequired(), Length(max=100)]
     )
 
+
 class LogoutForm(FlaskForm):
     """Form for CSRF Protection on logout"""

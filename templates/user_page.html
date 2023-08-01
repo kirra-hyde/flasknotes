@@ -2,6 +2,12 @@
 
 {% block content %}
 
+  <ul>
+    <li>Username: {{user.username}}</li>
+    <li>E-mail: {{user.email}}</li>
+    <li>Name: {{user.first_name}} {{user.last_name}}</li>
+  </ul>
+
   <form method="POST" action="/logout">
 
     {{ form.hidden_tag() }}

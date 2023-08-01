@@ -50,6 +50,8 @@ class User(db.Model):
 
         hashed = bcrypt.generate_password_hash(password).decode('utf8')
 
+        #TODO: db add and commit is good here.
+
         return cls(
             username=username,
             password=hashed,
@@ -62,7 +64,7 @@ class User(db.Model):
     def authenticate(cls, username, password):
         """
         Authenticates the provided username with the provided password.
-        Returns the associated User instance if password matches.
+        Returns the associated User instance if username and password match.
         Returns False if the username / password combination is not found.
         """
 
