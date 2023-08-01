@@ -21,6 +21,7 @@ toolbar = DebugToolbarExtension(app)
 @app.get("/")
 def route_redirect():
     """Redirects users from route to register"""
+       #TODO: Good to redirect to user page if logged in
     return redirect("/register")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -29,7 +30,6 @@ def display_registration_form_and_handle_registration():
     Handles form submission and creates user. Redirects to user page."""
 
     form = RegisterForm()
-    #TODO: Good to redirect to user page if logged in
 
     if form.validate_on_submit():
         username = form.username.data
@@ -43,7 +43,7 @@ def display_registration_form_and_handle_registration():
         db.session.add(user)
         db.session.commit()
 
-        session["username"] = user.username  #TODO: Could be in global variable..l
+        session["username"] = user.username  #TODO: Could be in global variable
 
         return redirect(f"/users/{username}")
 
@@ -93,3 +93,12 @@ def logout():
         session.pop("username", None) #:TODO: Scary message
 
     return redirect("/")
+
+@app.post("/users/<username>/delete")
+def delete_account(username):
+    """Removes current user from database.  Redirect to homepage."""
+
+    user = User.query.get_or_404(username)
+
+    db.session.delete(user)
+    db.session.commit()

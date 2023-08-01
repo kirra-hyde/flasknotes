@@ -8,6 +8,25 @@
     <li>Name: {{user.first_name}} {{user.last_name}}</li>
   </ul>
 
+  <h3>Notes:</h3>
+  <ul>
+    {% for note in user.notes %}
+      <li>
+        note.title
+        <a href="/notes/{{note.id}}/update">Edit me</a>
+        <a href="/notes/{{note.id}}/delete">Delete me</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <form method="POST", action="/users/{{user.username}}/notes/add">
+    <button>Add another note</button>
+  </form>
+
+  <form method="POST", action="/users/{{user.username}}/delete">
+    <button>Delete account and all posts!</button>
+  </form>
+
   <form method="POST" action="/logout">
 
     {{ form.hidden_tag() }}
