@@ -3,8 +3,8 @@ import os
 from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
-from models import connect_db, db, User
-from forms import RegisterForm, LoginForm, CSRFProtectionForm
+from models import connect_db, db, User, Note
+from forms import RegisterForm, LoginForm, CSRFProtectionForm, AddNoteForm
 from werkzeug.exceptions import Unauthorized
 
 app = Flask(__name__)
@@ -123,3 +123,29 @@ def delete_account(username):
     session.pop("username", None)
 
     return redirect("/")
+
+@app.route("/users/<username>/notes/add", methods=["GET", "POST"])
+def display_add_note_form_and_handle_note_creation(username):
+    """Display an add note form and create new note instances from form.
+    Redirect to user page."""
+
+    if session.get("username") != username:
+        raise Unauthorized()
+
+    user = User.query.get_or_404(username)
+
+    form = AddNoteForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+
+        note = Note(title=title, content=content, owner_username=username)
+
+        db.session.add(note)
+        db.session.commit()
+
+        return redirect(f"/users/{username}")
+
+
+    return render_template("add_note_form.html", form=form)

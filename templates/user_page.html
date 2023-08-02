@@ -3,16 +3,16 @@
 {% block content %}
 
   <ul>
-    <li>Username: {{user.username}}</li>
-    <li>E-mail: {{user.email}}</li>
-    <li>Name: {{user.first_name}} {{user.last_name}}</li>
+    <li>Username: {{ user.username }}</li>
+    <li>E-mail: {{ user.email }}</li>
+    <li>Name: {{ user.first_name }} {{ user.last_name }}</li>
   </ul>
 
   <h3>Notes:</h3>
   <ul>
     {% for note in user.notes %}
       <li>
-        note.title
+        {{ note.title }}
         <a href="/notes/{{note.id}}/update">Edit me</a>
         <a href="/notes/{{note.id}}/delete">Delete me</a>
       </li>
